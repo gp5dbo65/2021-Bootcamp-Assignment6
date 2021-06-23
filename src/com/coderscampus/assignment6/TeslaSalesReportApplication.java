@@ -5,13 +5,8 @@ import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.OptionalInt;
-import java.util.Set;
-import java.util.function.ToIntFunction;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import com.coderscampus.assignment6.domain.SalesData;
 import com.coderscampus.assignment6.fileservice.FileService;
 
@@ -19,7 +14,6 @@ public class TeslaSalesReportApplication {
 	/* class variables and constants */
 	public static final String REPORT_HEADER = " Yearly Sales Report";
 	public static final String REPORT_LINE_DIVIDER = "---------------------------";
-	private static ToIntFunction SalesData;
 	
 	public static void main(String[] args) throws IOException {
 		/* data structure to store the sales data by car model */
@@ -33,22 +27,32 @@ public class TeslaSalesReportApplication {
 		TeslaModelS = (teslaFS.loadSalesDataList("./modelS.csv"));
 		TeslaModelX = (teslaFS.loadSalesDataList("./modelX.csv"));
 	
-		/* create sales data report by model */
+		/* create sales data report by model ***NON-STREAM SOLUTION*** */
 		ProcessSalesData(TeslaModel3, "Model 3");
+		System.out.println(REPORT_LINE_DIVIDER);
+		ProcessSalesData(TeslaModelS, "Model S");
+		System.out.println(REPORT_LINE_DIVIDER);
+		ProcessSalesData(TeslaModelX, "Model X");
+
+		/* create sales data report by model ***STREAM SOLUTION - INCOMPLETE*** */
 		CreateSalesDataReport(TeslaModel3, "Model 3");
 		System.out.println(REPORT_LINE_DIVIDER);
-
-//		ProcessSalesData(TeslaModelS, "Model S");
+		
 //		CreateSalesDataReport(TeslaModel3, "Model 3");
 //		System.out.println(REPORT_LINE_DIVIDER);
 //
-//		ProcessSalesData(TeslaModelX, "Model X");
 //		CreateSalesDataReport(TeslaModel3, "Model 3");
 //		System.out.println(REPORT_LINE_DIVIDER);
 
 	} //end of main
 	
 	/* Sales Data Report Output */
+	/********************************************************************/
+	/* THIS METHOD WAS SUPPOSE TO USE STREAMS TO BUILD THE SALES REPORT */
+	/* I WAS UNABLE TO COMPLETE THIS TASK. I COULDN'T FIGURE OUT HOW TO */
+	/* CAPTURE AND PROCESS THE STREAM THAT WAS COMING OUT OF THE VALUE  */
+	/* PORTION OF THE HASH MAP DATA STRUCTURE groupedByYearlySalesData  */
+	/********************************************************************/
 	private static void CreateSalesDataReport(List<SalesData> teslaSalesData, String modelName) {
 		System.out.println(modelName + REPORT_HEADER);
 		System.out.println(REPORT_LINE_DIVIDER);
@@ -57,21 +61,34 @@ public class TeslaSalesReportApplication {
 		Map<Integer, List<SalesData>> groupedByYearlySalesData = 
 				teslaSalesData.stream()
 				     		  .collect(Collectors.groupingBy(x -> x.getDate().getYear()));
-
+		
+		/* test code to view the contents of the hash map*/
 		System.out.println(groupedByYearlySalesData);
 		
-		List<String> map = groupedByYearlySalesData.entrySet()
+		/* Stuck on this section of the code. */
+		List<String> yearlySalesTotals = groupedByYearlySalesData.entrySet()
 								.stream()
-								.map(entry -> entry.getKey() + " -> " + entry.getValue().stream())
+								.map(entry -> entry.getKey() + " -> " + 
+											  entry.getValue().stream() + "\n")
+//								.collect(Collectors.??????)
+//								.flatMapToInt(????)
+//								.map(entry -> getSales())
+								/* This .collect method was used to capture the results. */
+								/* Not sure what would be the final variable type        */
+								/* assignment should be for this portion of the stream   */
 								.collect(Collectors.toList());
 								
-		System.out.println(map);
+		System.out.println(yearlySalesTotals);
 		
 		
 		
 		
 		System.out.println(REPORT_LINE_DIVIDER);
 		
+		/* This was test code to see if I could find the min/max in the stream. */
+		/* However, this code cannot provide the YearMonth that is associated   */
+		/* with the min/max sales data. I've spent too much time trying to      */
+		/* get the yearly totals, that I just gave up on working with streams   */
 		OptionalInt maxSalesAmount = teslaSalesData.stream()
 												   .mapToInt(x -> x.getSales())
 												   .max();
@@ -88,6 +105,17 @@ public class TeslaSalesReportApplication {
 		
 	} //end of CreateSalesDataReport
 
+	/* Sales Data Report Output */
+	/********************************************************************/
+	/* I CREATED THIS METHOD TO BE USED TO VERIFY THE RESULTS OF THE    */
+	/* STREAM METHOD - CreateSalesDataReport - WHICH I WAS NOT ABLE TO  */
+	/* COMPLETE. I HAVE "HARD-CODED" FOUR YEAR SPECIFIC TOTAL FIELDS,   */
+	/* SO, IF THERE WERE ANY NEW DATE DATA ADDED TO THE CSV FILES, THEN */
+	/* THE PROGRAM WOULD TERMINATE AND DISPLAY A MESSAGE THAT THE YEAR- */
+	/* MONTH DATE ENCOUNTERED THAT WAS OUT OF BOUNDS (2016-2019)        */
+	/* A BETTER METHOD WOULD BE IF A HASH MAP WAS USED TO TRACK THE     */
+	/* YEARS AS THE KEY AND STORE A LIST OF SALESDATA AS THE VALUE      */
+	/********************************************************************/
 	private static void ProcessSalesData(List<SalesData> teslaSalesData, String modelName) {
 		Integer minSalesAmount = Integer.MAX_VALUE;
 		Integer maxSalesAmount = Integer.MIN_VALUE;

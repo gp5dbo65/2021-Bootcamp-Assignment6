@@ -34,7 +34,7 @@ public class TeslaSalesReportApplication {
 		TeslaModelX = (teslaFS.loadSalesDataList("./modelX.csv"));
 	
 		/* create sales data report by model */
-//		ProcessSalesData(TeslaModel3, "Model 3");
+		ProcessSalesData(TeslaModel3, "Model 3");
 		CreateSalesDataReport(TeslaModel3, "Model 3");
 		System.out.println(REPORT_LINE_DIVIDER);
 
